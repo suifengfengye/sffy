@@ -6,6 +6,19 @@
  */
 (function(window, $){
 	
+	//月份中显示的日期数
+	var MONTH_NUM = 42;
+	
+	/**
+	 * 显示月份的对象
+	 */
+	var ShowMonth = function(d){
+		var dDay = d.getDay(),
+			lastDate = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+		this.preDates = dDay;
+		this.nextDates = MONTH_NUM - dDay - lastDate;
+		this.lastDate = lastDate;
+	};
 	
 	/*
 	 * 日历类
@@ -31,7 +44,7 @@
 				this.date = this.cfg.curDate.getDate();
 				
 				//显示在当前日历中的数据
-				//TODO
+				this.curShowMonth = new ShowMonth(this.cfg.curDate);
 			},
 			//构件日历插件到框架
 			renderUI: function(){
@@ -52,7 +65,7 @@
 			},
 			//生成日期
 			renderDate: function(){
-				
+				//TODO
 			},
 			//获取x年x月（title显示）
 			getTitle: function(){
@@ -74,15 +87,6 @@
 		};
 		return calendar;
 	})();
-	
-	/**
-	 * 显示月份的对象
-	 */
-	var ShowMonth = {
-		preDates: 0,
-		nextDates: 0,
-		lastDate: 30
-	};
 	
 	//
 	$.fn.calendar = function(settings){
