@@ -31,6 +31,7 @@ li{
 	line-height: 0.80rem;
 	font-size: 0.48rem;
 	text-align: center;
+	background-color: #fff;
 }
 .cal-premonth-arrow, .cal-nextmonth-arrow{
 	display: inline-block;
@@ -60,7 +61,7 @@ li{
 	line-height: 0.38rem;
 	color: #ccc;
 	border: 1px solid #ccc;
-	border-radius: 100%;
+	border-radius: 50%;
 }
 .cal-today-ico-active{
 	color: #4787d8;
@@ -93,6 +94,7 @@ li{
 	display: table-cell;
 	width: 14.28%;
 	text-align: center;
+	padding: 0.02rem 0;
 }
 .cal-oneweek > span span{
 	display: inline-block;
@@ -108,12 +110,11 @@ li{
 }
 .cal-today span{
 	border: 1px solid #ccc;
-	border-radius: 100%;
+	border-radius: 50%;
 }
 .cal-curdate span{
 	background-color: #4787D8;
-	border: 1px solid #4787D8;
-	border-radius: 100%;
+	border-radius: 50%;
 	color: #fff;
 }
 .cal-tag{
@@ -123,7 +124,7 @@ li{
 	content: '';
 	position: absolute;
 	left: 50%;
-	bottom: -0.15rem;
+	bottom: -0.08rem;
 	width: 0.08rem;
 	height: 0.08rem;
 	border-radius: 100%;

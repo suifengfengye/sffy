@@ -17,9 +17,15 @@
 			var d = new Date();
 			$('.cal-wrap').calendar({
 				todayIco: true,
-				startDay: 0
+				startDay: 0,
+				initSlideUp: false, //默认收起
+				tags: [29, 20],
+				preTags: [5, 30],
+				nextTags: [2, 8]
 				//,curDate: new Date(d.getFullYear(), -1, d.getDate() - 2)
 			});
+			//var calendar = $('.cal-wrap').data('instance');
+			//calendar.takeTags([1, 2, 3]);
 		}
 	};
 

@@ -25,14 +25,32 @@
 				$.extend(true, this.cfg, settings);
 
 				this.touch = {};
-				this.isSlideUp = false;
-				this.isSlideDown = true;
 				this.header = {};
-				this.header.isSlideUp = false;
+				if(this.cfg.initSlideUp){
+					this.isSlideUp = true;
+					this.isSlideDown = false;
+					this.header.isSlideUp = true;
+				}else{
+					this.isSlideUp = false;
+					this.isSlideDown = true;
+					this.header.isSlideUp = false;
+				}
 
 				this.initData();
 
 				this.renderUI();
+
+				//take tags
+				if(this.cfg.tags.length > 0){
+					this.takeTags(this.cfg.tags);
+				}
+				if(this.cfg.preTags.length > 0){
+					this.takePreTags(this.cfg.preTags);
+				}
+				if(this.cfg.nextTags.length > 0){
+					this.takeNextTags(this.cfg.nextTags);
+				}
+
 
 				this.initEvent();
 			},
@@ -68,6 +86,13 @@
 				}
 				this.$target.css({'position': 'relative', 'left': distance});
 				this.$target.animate({'left': '0%'}, 500);
+
+				//
+				if(this.isSlideUp){
+					this.slideUp();
+				}
+
+
 			},
 			//生成日期
 			renderDate: function(){
@@ -89,7 +114,7 @@
 					html += '<div class="cal-oneweek">';
 					for(var j = 0; j < WEEK_DATES; j++){
 							if(preIndex <= preMonthLastDate){
-								html += '<span class="cal-date cal-pre" data-date="' + preIndex + '"><span>' + preIndex + '</span></span>';
+								html += '<span class="cal-pre" data-date="' + preIndex + '"><span>' + preIndex + '</span></span>';
 								preIndex++;
 							}else if(index <= this.curShowMonth.lastDate){
 								if(index == d.getDate() && this.month == d.getMonth() && this.year == d.getFullYear()){
@@ -105,7 +130,7 @@
 								html += '<span class="cal-date ' + todayClass + ' '+ curDayClass + '" data-date="' + index + '"><span>' + index + '</span></span>';
 								index++;
 							}else{
-								html += '<span class="cal-date cal-next" data-date="' + nextIndex + '"><span>' + nextIndex + '</span></span>';
+								html += '<span class="cal-next" data-date="' + nextIndex + '"><span>' + nextIndex + '</span></span>';
 								nextIndex++;
 							}
 					}
@@ -201,9 +226,9 @@
 					}
 				});
 
+				//上下折叠事件绑定
 				me.$target.height(me.$target.height());
 				this.$target.on('touchstart',  function(e){
-					console.log('touchstart');
 					me.touch.moveY = me.touch.startY = e.touches[0].pageY;
 				});
 
@@ -217,7 +242,6 @@
 				});
 
 				this.$target.on('touchend',  function(e){
-					console.log('touchend');
 				});
 			},
 			//获取上一个月(取最后一天)
@@ -276,68 +300,119 @@
 				showMonth.lastDate = lastDate;
 				return showMonth;
 			},
+			//收起日历
+			slideUp: function(){
+				var me = this;
+				//收起头部
+				var headerHeight = me.$target.find('.cal-header').height();
+				me.$target.css('top', (-headerHeight) + 'px');
+
+				//设置日历主体高度
+				var oneweekHeight = me.$target.find('.cal-oneweek').height(),
+				 		bodyHeight = me.$target.find('.cal-day').height() + oneweekHeight;
+				me.$target.height(bodyHeight + headerHeight);
+
+				//定位选中日期所在的周
+				var rowIndex = 0,
+						prevRowHeight = 0;
+				me.$target.find('.cal-oneweek').each(function(index){
+					if($(this).find('.cal-curdate').length > 0){
+						rowIndex = index;
+						prevRowHeight = rowIndex * oneweekHeight;
+						return;
+					}
+				});
+				me.$target.find('.cal-date-wrap').css('top', -prevRowHeight + 'px');
+
+			},
 			//控制展开、收起
 			slideCtrl: function(distance){
 				var me = this;
 				//折叠
 				if(distance < 0 && !me.isSlideUp){
-
+					//1 start -------------------------------------------------------------------------
+					var headerTop = parseInt(me.$target.css('top').split('px')[0]),
+							headerHeight = me.$target.find('.cal-header').height();
 					//收起头部
 					if(!me.header.isSlideUp){
-						var headerTop = me.$target.css('top').split('px')[0];
-						var ht = distance + parseInt(headerTop),
-                calHeaderHeight = me.$target.find('.cal-header').height();
-						if(Math.abs(ht) < calHeaderHeight){
+						var ht = distance + headerTop;
+						if(Math.abs(ht) < headerHeight){
 							me.$target.css('top', ht + 'px');
-						}else if(Math.abs(ht) >= calHeaderHeight && Math.abs(headerTop) < calHeaderHeight){
-              me.$target.css('top', -calHeaderHeight + 'px');
+						}else if(Math.abs(ht) >= headerHeight && Math.abs(headerTop) < headerHeight){
+              me.$target.css('top', -headerHeight + 'px');
             }else{
 							me.header.isSlideUp = true;
 						}
 					}
+					//1 end -------------------------------------------------------------------------
+
+					//2 start -------------------------------------------------------------------------
+					var rowIndex = 0,
+							prevRowHeight = 0,//在选中日期之前周高度的总和
+							top = parseInt(me.$target.find('.cal-date-wrap').css('top').split('px')[0]),
+							targetTop = parseInt(me.$target.css('top').split('px')[0]),
+							oneweekHeight = me.$target.find('.cal-oneweek').height(),
+							dayHeight = me.$target.find('.cal-day').height();
+					//当前选中了第几行
+					$('.cal-oneweek').each(function(index){
+						if($(this).find('.cal-curdate').length > 0){
+							rowIndex = index;
+							prevRowHeight = rowIndex * oneweekHeight;
+							return;
+						}
+					});
 
 					//收起日历
 					if(me.header.isSlideUp){
-						//当前选中了第几行
-						var rowIndex = 0;
-						$('.cal-oneweek').each(function(index){
-							if($(this).find('.cal-curdate').length > 0){
-								rowIndex = index;
-							}
-						});
-
-						var top = me.$target.find('.cal-date-wrap').css('top').split('px')[0];
-						var tp = distance + parseInt(top);
-
-						var targetTop = parseInt(me.$target.css('top').split('px')[0]);
-						if(Math.abs(tp) < rowIndex * $('.cal-oneweek').height()){
+						var tp = distance + top;
+						if(Math.abs(tp) < prevRowHeight){
 							me.$target.find('.cal-date-wrap').css('top', tp + 'px');
 							me.$target.height(me.$target.height() + distance);
-						}else if(Math.abs(tp) >= rowIndex * $('.cal-oneweek').height() && Math.abs(top) < rowIndex * $('.cal-oneweek').height()){
-              me.$target.find('.cal-date-wrap').css('top', -(rowIndex * $('.cal-oneweek').height()) + 'px');
-							//me.$target.height(me.$target.height() -(rowIndex * $('.cal-oneweek').height()));
-            }else if((me.$target.height() + targetTop) > $('.cal-oneweek').height() + me.$target.find('.cal-day').height()){
-							me.$target.height(me.$target.height() + distance);
+						}else if(Math.abs(tp) >= prevRowHeight && Math.abs(top) < prevRowHeight){
+              me.$target.find('.cal-date-wrap').css('top', -prevRowHeight + 'px');
+							me.$target.height(me.$target.height() -(prevRowHeight - Math.abs(top)));
+            }else if((me.$target.height() + targetTop) > (oneweekHeight + dayHeight)){
+							if(me.$target.height() + targetTop + distance < oneweekHeight + dayHeight){
+								me.$target.height(oneweekHeight + dayHeight - targetTop);
+							}else{
+								me.$target.height(me.$target.height() + distance);
+							}
 						}else{
 							me.isSlideUp = true;
 						}
 					}
+					//2 end -------------------------------------------------------------------------
+
 					me.isSlideDown = false;
+
 				}else if( distance > 0 && !me.isSlideDown){
 					//展开body
-					var top = me.$target.find('.cal-date-wrap').css('top').split('px')[0];
-					var tp = distance + parseInt(top);
-					var targetTop = parseInt(me.$target.css('top').split('px')[0]);
-					if(tp <= 0){
+					var top = parseInt(me.$target.find('.cal-date-wrap').css('top').split('px')[0]),
+							tp = distance + top,
+							targetTop = parseInt(me.$target.css('top').split('px')[0]),
+							targetHeight = me.$target.height(),
+							dateWrapHeight = me.$target.find('.cal-date-wrap').height(),
+							dayHeight = me.$target.find('.cal-day').height();
+
+					if(tp <= 0 && top < 0){
 						me.$target.find('.cal-date-wrap').css('top', tp + 'px');
 						me.$target.height(me.$target.height() + distance);
-					}else if((me.$target.height() - Math.abs(targetTop)) < me.$target.find('.cal-date-wrap').height() + me.$target.find('.cal-day').height()){
-						me.$target.height(me.$target.height() + distance);
+					}else if(tp > 0 && top > 0){
+						me.$target.find('.cal-date-wrap').css('top', '0px');
+						me.$target.height(me.$target.height() + Math.abs(top));
+					}else if((me.$target.height() - Math.abs(targetTop)) < dateWrapHeight + dayHeight){
+						if(me.$target.height() - Math.abs(targetTop) + distance >= dateWrapHeight + dayHeight){
+							me.$target.height(dateWrapHeight + dayHeight + Math.abs(targetTop));
+						}else{
+							me.$target.height(me.$target.height() + distance);
+						}
 					}else if(me.header.isSlideUp){//展开header
-							var headerTop = me.$target.css('top').split('px')[0];
-							var ht = distance + parseInt(headerTop);
-							if(headerTop <= 0){
+							var ht = distance + targetTop;
+							if(targetTop <= 0 && ht <= 0){
 								me.$target.css('top', ht + 'px');
+							}else if(targetTop <= 0 && ht > 0){
+								me.$target.css('top', '0px');
+								me.header.isSlideUp = false;
 							}else{
 								me.header.isSlideUp = false;
 							}
@@ -345,6 +420,54 @@
 						me.isSlideDown = true;
 					}
 					me.isSlideUp = false;
+				}
+			},
+			//打红点
+			takeTags: function(dates){
+				var me = this;
+				if(dates instanceof Array){
+					for(var i in dates){
+						me.$target.find('.cal-date[data-date="' + dates[i] + '"]').addClass('cal-tag');
+					}
+				}
+			},
+			//取消红点
+			cancleTags: function(dates){
+				var me = this;
+				for(var i in dates){
+					me.$target.find('.cal-date[data-date="' + dates[i] + '"]').removeClass('cal-tag');
+				}
+			},
+			//打红点
+			takePreTags: function(dates){
+				var me = this;
+				if(dates instanceof Array){
+					for(var i in dates){
+						me.$target.find('.cal-pre[data-date="' + dates[i] + '"]').addClass('cal-tag');
+					}
+				}
+			},
+			//取消红点
+			canclePreTags: function(dates){
+				var me = this;
+				for(var i in dates){
+					me.$target.find('.cal-pre[data-date="' + dates[i] + '"]').removeClass('cal-tag');
+				}
+			},
+			//打红点
+			takeNextTags: function(dates){
+				var me = this;
+				if(dates instanceof Array){
+					for(var i in dates){
+						me.$target.find('.cal-next[data-date="' + dates[i] + '"]').addClass('cal-tag');
+					}
+				}
+			},
+			//取消红点
+			cancleNextTags: function(dates){
+				var me = this;
+				for(var i in dates){
+					me.$target.find('.cal-next[data-date="' + dates[i] + '"]').removeClass('cal-tag');
 				}
 			}
 		};
@@ -367,7 +490,11 @@
 	$.fn.calendar.default = {
 		curDate: new Date(),//当前选中的日期，默认当天
 		todayIco: true, //“今”都按钮是否显示，默认显示
-		startDay: 0  //星期几作为第一列，周天：0，周一～周六：1～6，默认从星期天开始
+		startDay: 0,  //星期几作为第一列，周天：0，周一～周六：1～6，默认从星期天开始
+		initSlideUp: true, //是否初始化就是折叠的日历
+		tags: [],    //给当前月的日期打红点
+		preTags: [],  //给前一个月的日期打红点
+		nextTags: [] //给下一个月的日期打红点
 	};
 
 })(window, Zepto);
