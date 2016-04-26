@@ -114,7 +114,7 @@
 					html += '<div class="cal-oneweek">';
 					for(var j = 0; j < WEEK_DATES; j++){
 							if(preIndex <= preMonthLastDate){
-								html += '<span class="cal-pre" data-date="' + preIndex + '"><span>' + preIndex + '</span></span>';
+								html += '<span class="cal-date cal-pre" data-date="' + preIndex + '"><span>' + preIndex + '</span></span>';
 								preIndex++;
 							}else if(index <= this.curShowMonth.lastDate){
 								if(index == d.getDate() && this.month == d.getMonth() && this.year == d.getFullYear()){
@@ -127,10 +127,10 @@
 								}else{
 									curDayClass = '';
 								}
-								html += '<span class="cal-date ' + todayClass + ' '+ curDayClass + '" data-date="' + index + '"><span>' + index + '</span></span>';
+								html += '<span class="cal-date cal-cur' + todayClass + ' '+ curDayClass + '" data-date="' + index + '"><span>' + index + '</span></span>';
 								index++;
 							}else{
-								html += '<span class="cal-next" data-date="' + nextIndex + '"><span>' + nextIndex + '</span></span>';
+								html += '<span class="cal-date cal-next" data-date="' + nextIndex + '"><span>' + nextIndex + '</span></span>';
 								nextIndex++;
 							}
 					}
@@ -427,7 +427,7 @@
 				var me = this;
 				if(dates instanceof Array){
 					for(var i in dates){
-						me.$target.find('.cal-date[data-date="' + dates[i] + '"]').addClass('cal-tag');
+						me.$target.find('.cal-cur[data-date="' + dates[i] + '"]').addClass('cal-tag');
 					}
 				}
 			},
@@ -435,7 +435,7 @@
 			cancleTags: function(dates){
 				var me = this;
 				for(var i in dates){
-					me.$target.find('.cal-date[data-date="' + dates[i] + '"]').removeClass('cal-tag');
+					me.$target.find('.cal-cur[data-date="' + dates[i] + '"]').removeClass('cal-tag');
 				}
 			},
 			//打红点
