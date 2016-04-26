@@ -1,0 +1,74 @@
+/**
+ * @desc common css
+ * @requires
+ * @author jianfeng_huang
+ * @date 2016-04-04
+ * */
+/* mobile setting  */
+html[data-dpr="2"] .border{
+	position: relative;
+}
+html[data-dpr="2"] .border:before{
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 1px;
+	width: 200%;
+	background-color: #ccc;
+	-webkit-transform-origin: top left;
+	transform-origin: top left;
+	-webkit-transform: scale(0.5);
+	transform: scale(0.5);
+}
+html[data-dpr="2"] .border-t:before{
+	top: 0;
+}
+html[data-dpr="2"] .border-b:before{
+	bottom: 0;
+}
+
+html[data-dpr="1"] .border-t{
+	border-top: 1px solid #ccc;
+}
+html[data-dpr="1"] .border-b{
+	border-bottom: 1px solid #ccc;
+}
+/* wrapper */
+body{
+  font-family: '微软雅黑', sans-serif;
+  color: #3f3f3f;
+	width: 100%;
+}
+.wrapper{
+	width: 100%;
+	background-color: #fff;
+}
+
+/* animate */
+.leftin{
+	-webkit-transform: translateX(-110%);
+			transform: translateX(-110%);
+	-webkit-animation: leftIn 500ms ease-out forwards;
+			animation: leftIn 500ms ease-out forwards;
+}
+
+@keyframes leftIn{
+	from{
+		-webkit-transform: translateX(-110%);
+				transform: translateX(-110%);
+	}
+	to{
+		-webkit-transform: translateX(0%);
+				transform: translateX(0%);
+	}
+}
+
+@-webkit-keyframes leftIn{
+	from{
+		-webkit-transform: translateX(-110%);
+	}
+	to{
+		-webkit-transform: translateX(0%);
+	}
+}
